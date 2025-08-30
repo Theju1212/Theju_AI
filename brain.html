@@ -17,23 +17,26 @@
       align-items: center;
       color: white;
       flex-direction: column;
-      cursor: pointer;
     }
     #hint {
       position: absolute;
-      bottom: 40px;
-      font-size: 1.2rem;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+      text-align: center;
       background: rgba(0,0,0,0.5);
-      padding: 10px 20px;
+      padding: 10px 15px;
       border-radius: 10px;
+      max-width: 90%;
       box-shadow: 0 0 15px rgba(255,255,255,0.7);
     }
+    canvas { display: block; }
   </style>
 </head>
 <body>
   <div id="hint">🧠 Tap the Core to Awaken Intelligence → Enter Think Mode</div>
 
-  <!-- Importmap for Three.js -->
   <script type="importmap">
   {
     "imports": {
@@ -67,14 +70,12 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Orbit Controls (mouse drag / zoom)
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.8;
 
-      // Lights
       const ambient = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambient);
 
@@ -82,17 +83,13 @@
       pointLight.position.set(5, 5, 5);
       scene.add(pointLight);
 
-      // Brain model loader (local file)
       const loader = new GLTFLoader();
-      loader.load(
-        "brain_areas.glb",
+      loader.load("brain_areas.glb",
         (gltf) => {
           brain = gltf.scene;
           brain.scale.set(1.5, 1.5, 1.5);
-          brain.position.set(0, 0, 0);
-
-          // Make brain white with subtle bloom
-          brain.traverse((node) => {
+          scene.add(brain);
+          brain.traverse(node => {
             if (node.isMesh) {
               node.material.color = new THREE.Color(0xffffff);
               node.material.emissive = new THREE.Color(0xffffff);
@@ -101,28 +98,22 @@
               node.material.opacity = 0.98;
             }
           });
-
-          scene.add(brain);
-          console.log("✅ Brain model loaded");
         },
         undefined,
         (error) => console.error("❌ Error loading brain model:", error)
       );
 
-      // Add floating glowing particles around brain
       const particles = new THREE.BufferGeometry();
-      const particleCount = 1200; // more particles
+      const particleCount = 1000;
       const positions = new Float32Array(particleCount * 3);
-
       for (let i = 0; i < particleCount * 3; i++) {
-        positions[i] = (Math.random() - 0.5) * 6; // scatter around brain
+        positions[i] = (Math.random() - 0.5) * 6;
       }
-
       particles.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
       const particleMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
-        size: 0.008,   // much smaller dots
+        size: 0.008,
         transparent: true,
         opacity: 0.6
       });
@@ -133,32 +124,19 @@
       clock = new THREE.Clock();
       window.addEventListener("resize", onResize);
 
-      // Bloom effect composer
       const renderScene = new RenderPass(scene, camera);
-      bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        1.2, // softer glow
-        0.8,
-        0.7
-      );
+      bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.8, 0.7);
 
       composer = new EffectComposer(renderer);
       composer.addPass(renderScene);
       composer.addPass(bloomPass);
 
-      // Hover effect → impulse glow
-      renderer.domElement.addEventListener("mouseenter", () => {
-        hoverPulse = 1;
-      });
-
-      // Click → go to chat
-      renderer.domElement.addEventListener("click", () => {
-        window.location.href = "/chat.html";
-      });
+      renderer.domElement.addEventListener("mouseenter", () => { hoverPulse = 1; });
+      renderer.domElement.addEventListener("click", () => { window.location.href = "/chat.html"; });
     }
 
     function onResize() {
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
@@ -169,7 +147,6 @@
       const elapsed = clock.getElapsedTime();
 
       if (brain) {
-        // Hover pulse impulse effect
         if (hoverPulse > 0) {
           bloomPass.strength = 2.0 * hoverPulse;
           hoverPulse -= 0.02;
@@ -178,7 +155,6 @@
         }
       }
 
-      // Float particles slowly
       if (particleSystem) {
         particleSystem.rotation.y += 0.0008;
         particleSystem.rotation.x += 0.0003;
