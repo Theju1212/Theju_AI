@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Theju AI · Brain Chat</title>
+  <style>
+ body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at center, #0f2027, #203a43, #2c5364);
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+    #chatbot-gif {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 15px rgba(0,255,255,0.7);
+      transition: transform 0.3s ease;
+    }
+    #chatbot-gif:hover {
+      transform: scale(1.1);
+    }
+    header {
+      padding: 15px 25px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      background: rgba(0,0,0,0.6);
+      border-radius: 15px;
+      margin: 15px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.7);
+      animation: pulse 3s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 20px rgba(0,255,255,0.6); }
+      50%  { box-shadow: 0 0 35px rgba(0,255,255,1); }
+      100% { box-shadow: 0 0 20px rgba(0,255,255,0.6); }
+    }
+    #chatbox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.3);
+      border-radius: 15px;
+      margin: 10px;
+      box-shadow: inset 0 0 10px rgba(0,255,255,0.3);
+    }
+    .message {
+      margin: 10px 0;
+      padding: 12px 18px;
+      border-radius: 15px;
+      max-width: 70%;
+      word-wrap: break-word;
+      box-shadow: 0 0 12px rgba(0,255,255,0.25);
+    }
+    .user {
+      background: rgba(0,255,255,0.15);
+      margin-left: auto;
+      text-align: right;
+      border-right: 3px solid cyan;
+    }
+    .bot {
+      background: rgba(255,255,255,0.08);
+      text-align: left;
+      border-left: 3px solid cyan;
+    }
+    #inputArea {
+      display: flex;
+      padding: 15px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 15px;
+      margin: 10px;
+      box-shadow: 0 0 15px rgba(0,255,255,0.5);
+    }
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid rgba(0,255,255,0.5);
+      outline: none;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    #userInput:focus {
+      border-color: cyan;
+      box-shadow: 0 0 10px rgba(0,255,255,0.7);
+    }
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background: linear-gradient(45deg, cyan, #00e0e0);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #0f2027;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 0 12px rgba(0,255,255,0.6);
+    }
+    #sendBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 20px rgba(0,255,255,1);
+    }
+    #chatbot-gif {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+      transition: transform 0.3s ease;
+    }
+    #chatbot-gif:hover {
+      transform: scale(1.1);
+    }
+    header {
+      padding: 15px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+      border-radius: 20px;
+      margin: 10px;
+      animation: pulse 3s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.7); }
+      50% { box-shadow: 0 0 30px rgba(0, 255, 255, 1); }
+      100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.7); }
+    }
+    #chatbox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
+      border-radius: 15px;
+      margin: 10px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      max-width: 70%;
+      word-wrap: break-word;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    .user {
+      background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(0, 150, 150, 0.3));
+      margin-left: auto;
+      text-align: right;
+      border-right: 3px solid cyan;
+    }
+    .bot {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(200, 200, 200, 0.2));
+      text-align: left;
+      border-left: 3px solid cyan;
+    }
+    #inputArea {
+      display: flex;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      margin: 10px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    }
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      outline: none;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    #userInput:focus {
+      border-color: cyan;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    }
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background: linear-gradient(45deg, cyan, #00e0e0);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #0f2027;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #sendBtn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <img id="chatbot-gif" src="chatbot.gif" alt="Chatbot Animation" />
+  <header>🧠 Theju AI · Chat Assistant</header>
+  <div id="chatbox"></div>
+
+  <div id="inputArea">
+    <input id="userInput" type="text" placeholder="Ask me anything..." />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById("chatbox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.innerText = text;
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      addMessage(text, "user");
+      userInput.value = "";
+
+      // Call your backend API (Groq-powered LLM)
+      addMessage("🤖 Thinking...", "bot");
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+
+        // Remove "Thinking..." and replace with real reply
+        chatbox.lastChild.remove();
+        addMessage(data.reply, "bot");
+      } catch (err) {
+        chatbox.lastChild.remove();
+        addMessage("❌ Error connecting to AI backend.", "bot");
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
